@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+
+coindesk
+<span id='excOne'> </span>
+blockchain
+<span id='excTwo'> </span>
+coinbase
+<span id='excThre'> </span>
+bitstamp
+<span id='excFour'> </span>
+bitpay
+<span id='excFive'> </span>
+Average Rate
+<span id='average'> </span>
+
+  </body>
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+<script type="text/javascript">
+let exc;
+   const socket = io()
+
+    socket.on('connect', () => {
+    })
+
+   socket.on('rates', (rates) => {
+   exc = rates;
+   document.getElementById('excOne').innerHTML = exc.exchanges.coindesk;
+   document.getElementById('excTwo').innerHTML = exc.exchanges.blockchain;
+   document.getElementById('excThre').innerHTML = exc.exchanges.coinbase;
+   document.getElementById('excFour').innerHTML = exc.exchanges.bitstamp;
+   document.getElementById('excFive').innerHTML = exc.exchanges.bitpay;
+   document.getElementById('average').innerHTML = exc.averageRate.rate;
+   console.log('New Rate');
+ })
+
+
+</script>
+</html>
