@@ -1,20 +1,21 @@
 const express = require('express');
 const request = require('request');
-const jwt = require('express-jwt');
-const app = express();
+const socketIO = require('socket.io');
+const http = require('http');
+const path = require('path');
+
+const publicPath = path.join(__dirname, '../public')
 const PORT = process.env.PORT || 3001;
 
-const exchanges = {
-    coindesk: '',
-    blockchain: '',
-    coinbase: '',
-    bitstamp: '',
-    bitpay: ''
-}
+const app = express();
+const server = http.createServer(app)
+const io = socketIO(server)
 
-const averageRate = {
-    rate: ''
-}
+app.use(express.static(publicPath))
+
+const exchanges = {}
+const averageRate = {}
+
 
 setInterval(function() {
     let counter = 0;
@@ -79,9 +80,29 @@ setInterval(function() {
         })
         averageRate.rate = summRate / counter;
         console.log(averageRate.rate);
-    });
-}, 60000);
 
+
+    })
+}, 40000)
+
+
+let userOnline = 0;
+io.on('connection', (socket) => {
+    userOnline += 1;
+    console.log(`User connected | Online: ${userOnline}`);
+
+    setInterval(function() {
+        io.emit('rates', {
+            exchanges,
+            averageRate
+        })
+    }, 3000)
+
+    socket.on('disconnect', function() {
+        userOnline -= 1;
+        console.log(`User disconnected | Online: ${userOnline}`);
+    })
+})
 
 app.get('/api', (req, res) => {
     res.json({
@@ -90,6 +111,6 @@ app.get('/api', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`)
 })
