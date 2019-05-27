@@ -81,6 +81,7 @@ setInterval(function() {
 
         averageRate.rate = summRate / counter;
         console.log(averageRate.rate);
+        
         io.emit('rates', {
             exchanges,
             averageRate
