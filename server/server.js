@@ -78,9 +78,14 @@ setInterval(function() {
             summRate += exchanges[key];
             counter += 1;
         })
+
         averageRate.rate = summRate / counter;
         console.log(averageRate.rate);
-
+        
+        io.emit('rates', {
+            exchanges,
+            averageRate
+        })
 
     })
 }, 40000)
@@ -91,20 +96,17 @@ io.on('connection', (socket) => {
     userOnline += 1;
     console.log(`User connected | Online: ${userOnline}`);
 
-    setInterval(function() {
-        io.emit('rates', {
-            exchanges,
-            averageRate
-        })
-    }, 3000)
-
+    socket.emit('rates', {
+        exchanges,
+        averageRate
+    })
     socket.on('disconnect', function() {
         userOnline -= 1;
         console.log(`User disconnected | Online: ${userOnline}`);
     })
 })
 
-app.get('/api', (req, res) => {
+app.get('/api/', (req, res) => {
     res.json({
         exchanges,
         averageRate
