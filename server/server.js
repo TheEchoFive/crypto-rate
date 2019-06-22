@@ -14,8 +14,6 @@ const io = socketIO(server)
 app.use(express.static(publicPath))
 
 const exchanges = {}
-const averageRate = {}
-
 
 setInterval(function() {
     let counter = 0;
@@ -72,23 +70,26 @@ setInterval(function() {
     });
 
     Promise.all([coindesk, blockchain, coinbase, bitstamp, bitpay]).then(() => {
+        let date = new Date();
         exchanges.coindesk = exchanges.coindesk.replace(',', '')
+
         Object.keys(exchanges).forEach(function(key) {
             exchanges[key] = parseFloat(exchanges[key]);
             summRate += exchanges[key];
             counter += 1;
         })
+        exchanges.rate = summRate / counter;
+        // exchanges.date = date;
 
-        averageRate.rate = summRate / counter;
-        console.log(averageRate.rate);
-        
+        console.log(date);
+        console.log(exchanges.rate);
+
         io.emit('rates', {
-            exchanges,
-            averageRate
+            exchanges
         })
 
     })
-}, 40000)
+}, 10000)
 
 
 let userOnline = 0;
@@ -97,8 +98,7 @@ io.on('connection', (socket) => {
     console.log(`User connected | Online: ${userOnline}`);
 
     socket.emit('rates', {
-        exchanges,
-        averageRate
+        exchanges
     })
     socket.on('disconnect', function() {
         userOnline -= 1;
